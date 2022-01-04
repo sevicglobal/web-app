@@ -103,7 +103,7 @@
 	    <snapshotRepository>
 	      <id>nexus</id>
 	      <name>Landmark Technologies Snapshot Nexus Repository </name>
-	      <url>http://3.145.43.180:8081/repository/chase-project1-snapshot/</url>
+	      <url>http://3.145.43.180:8081/repository/barclays-snapshot/</url>
 	    </snapshotRepository>
 	    
 	</distributionManagement>
