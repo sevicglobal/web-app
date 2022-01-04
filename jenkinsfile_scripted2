@@ -1,0 +1,40 @@
+//Scripted Pipeline
+
+node {
+  def MavenHome = tool name: 'maven3.8.4'
+
+  stage('1. CodeClone') {
+    git credentialsId: 'github-credentials', url: 'https://github.com/sevicglobal/web-app'
+  }
+  
+  stage('2. MavenBuild') {
+    sh "${MavenHome}/bin/mvn clean package"
+  }
+  
+  stage('3. CodeQuality') {
+    sh "${MavenHome}/bin/mvn sonar:sonar"
+  }
+  
+  stage('4. UploadArtifactsNexus') {
+    sh "${MavenHome}/bin/mvn deploy"
+  }
+  
+  stage('5. Deploy_UAT') {
+    deploy adapters: [tomcat9(credentialsId: 'Tomcatcredentials', path: '', url: 'http://18.222.76.103:7000/')], contextPath: null, onFailure: false, war: 'target/*war'
+  }
+  
+  stage('6. Emailnotification') {
+    slackSend channel: '#pipeline', message: 'Pipeline building for your information and attention', notifyCommitters: true, teamDomain: 'pipeline-builders', tokenCredentialId: 'a393bce1-db59-4fa0-a917-0f37720f5515'
+  }
+  
+  stage('7. Approval') {
+    timeout(time: 5, unit: 'HOURS') {
+      input message: 'Abort or Approve'
+    }
+  }
+  
+  stage('8. DeployToProduction') {
+    deploy adapters: [tomcat9(credentialsId: 'Tomcatcredentials', path: '', url: 'http://18.222.76.103:7000/')], contextPath: null, onFailure: false, war: 'target/*war'
+  }
+  
+}
